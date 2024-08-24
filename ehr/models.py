@@ -21,7 +21,7 @@ class User(AbstractUser):
     )
 
 class Patient(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='patient', related_query_name='patient', verbose_name=_('user'), help_text=_('The user that this patient profile belongs to.'), default=None)
     first_name = models.CharField(_('first name'), max_length=255)
     last_name = models.CharField(_('last name'), max_length=255)
     date_of_birth = models.DateField(_('date of birth'))
@@ -36,7 +36,7 @@ class Patient(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 class MedicalProfessional(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='medical_professional', related_query_name='medical_professional', verbose_name=_('user'), help_text=_('The user that this medical professional profile belongs to.'), default=None)
     first_name = models.CharField(_('first name'), max_length=255)
     last_name = models.CharField(_('last name'), max_length=255)
     specialization = models.CharField(_('specialization'), max_length=255)
