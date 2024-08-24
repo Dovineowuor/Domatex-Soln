@@ -3,11 +3,24 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from ehr.models import Appointment, MedicalHistory, MedicalProfessional, Patient, User, VitalSigns
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from crispy_forms.layout import Submit
 
-class PatientRegistrationForm(forms.ModelForm):
+class PatientRegistrationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=255)
+    last_name = forms.CharField(max_length=255)
+    date_of_birth = forms.DateField()
+    gender = forms.CharField(max_length=10)
+    contact_number = forms.CharField(max_length=20)
+    email_address = forms.EmailField()
+    address = forms.CharField(widget=forms.Textarea)
+    insurance_provider = forms.CharField(max_length=255)
+    insurance_policy_number = forms.CharField(max_length=255)
+
     class Meta:
-        model = Patient
-        fields = ['username', 'password', 'password', 'first_name', 'last_name', 'date_of_birth', 'gender', 'contact_number', 'address', 'insurance_provider', 'insurance_policy_number']
+        model = User
+        fields = ['username', 'password1', 'password2', 'first_name', 'last_name', 'date_of_birth', 'gender', 'contact_number', 'email_address', 'address', 'insurance_provider', 'insurance_policy_number']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,16 +28,58 @@ class PatientRegistrationForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Register'))
 
-class MedicalProfessionalRegistrationForm(forms.ModelForm):
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_patient = True
+        if commit:
+            user.save()
+            patient = Patient(
+                user=user,
+                first_name=self.cleaned_data['first_name'],
+                last_name=self.cleaned_data['last_name'],
+                date_of_birth=self.cleaned_data['date_of_birth'],
+                gender=self.cleaned_data['gender'],
+                contact_number=self.cleaned_data['contact_number'],
+                email_address=self.cleaned_data['email_address'],
+                address=self.cleaned_data['address'],
+                insurance_provider=self.cleaned_data['insurance_provider'],
+                insurance_policy_number=self.cleaned_data['insurance_policy_number']
+            )
+            patient.save()
+        return user
+
+class MedicalProfessionalRegistrationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=255)
+    last_name = forms.CharField(max_length=255)
+    specialization = forms.CharField(max_length=255)
+    contact_number = forms.CharField(max_length=20)
+    email_address = forms.EmailField()
+
     class Meta:
-        model = MedicalProfessional
-        fields = ['username', 'password', 'password', 'first_name', 'last_name', 'date_of_birth']
+        model = User
+        fields = ['username', 'password1', 'password2', 'first_name', 'last_name', 'specialization', 'contact_number', 'email_address']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Register'))
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_medical_professional = True
+        if commit:
+            user.save()
+            medical_professional = MedicalProfessional(
+                user=user,
+                first_name=self.cleaned_data['first_name'],
+                last_name=self.cleaned_data['last_name'],
+                specialization=self.cleaned_data['specialization'],
+                contact_number=self.cleaned_data['contact_number'],
+                email_address=self.cleaned_data['email_address']
+            )
+            medical_professional.save()
+        return user
 
 class AppointmentForm(forms.ModelForm):
     class Meta:
