@@ -1,4 +1,5 @@
 # forms.py
+from datetime import date
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -10,7 +11,10 @@ from crispy_forms.layout import Submit
 class PatientRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=255)
     last_name = forms.CharField(max_length=255)
-    date_of_birth = forms.DateField()
+    date_of_birth = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        label='Date of birth',
+        error_messages={'invalid': 'Enter a valid date.'})
     gender = forms.CharField(max_length=10)
     contact_number = forms.CharField(max_length=20)
     email_address = forms.EmailField()
@@ -22,6 +26,12 @@ class PatientRegistrationForm(UserCreationForm):
         model = User
         fields = ['username', 'password1', 'password2', 'first_name', 'last_name', 'date_of_birth', 'gender', 'contact_number', 'email_address', 'address', 'insurance_provider', 'insurance_policy_number']
 
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if dob > date.today():
+            raise forms.ValidationError('Date of birth cannot be in the future.')
+        return dob
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
