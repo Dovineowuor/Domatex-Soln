@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .forms import AppointmentForm, MedicalHistoryForm, PatientRegistrationForm, MedicalProfessionalRegistrationForm, VitalSignsForm
 from .models import Patient, MedicalProfessional
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
+
 
 def register_patient(request):
     if request.method == 'POST':
@@ -21,8 +25,11 @@ def register_patient(request):
                 insurance_provider=user_form.cleaned_data.get('insurance_provider'),
                 insurance_policy_number=user_form.cleaned_data.get('insurance_policy_number')
             )
-            login(request, user)
-            return redirect('patient_success')
+            auth_login(request, user)  # Use auth_login to log in the user
+            messages.success(request, 'Registration successful.')
+            return redirect('patient_success')  # Ensure 'patient_success' is defined in your URLs
+        else:
+            messages.error(request, 'Please correct the error below.')
     else:
         user_form = PatientRegistrationForm()
     return render(request, 'registration/register_patient.html', {'form': user_form})
@@ -47,7 +54,24 @@ def register_medical_professional(request):
         user_form = MedicalProfessionalRegistrationForm()
     return render(request, 'registration/register_medical_professional.html', {'form': user_form})
 
-
+def custom_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome, {username}!')
+                return redirect('home')  # Redirect to the home page or another page
+            else:
+                messages.error(request, 'Invalid username or password.')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
 
 def book_appointment(request):
     if request.method == 'POST':
@@ -94,14 +118,9 @@ def patient_home(request):
 def medical_professional_home(request):
     return render(request, 'medical_professional_home.html')
 
-def login(request):
-    return render(request, 'registration/login.html')
 
 def logout(request):
     return render(request, 'registration/logout.html')
-
-def register(request):
-    return render(request, 'registration/register.html')
 
 def patient_profile(request):
     return render(request, 'patient_profile.html')
