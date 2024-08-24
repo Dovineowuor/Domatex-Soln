@@ -7,7 +7,7 @@ from ehr.models import Appointment, MedicalHistory, MedicalProfessional, Patient
 class PatientRegistrationForm(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ['username', 'password1', 'password2', 'first_name', 'last_name', 'date_of_birth', 'gender', 'contact_number', 'address', 'insurance_provider', 'insurance_policy_number']
+        fields = ['username', 'password', 'password', 'first_name', 'last_name', 'date_of_birth', 'gender', 'contact_number', 'address', 'insurance_provider', 'insurance_policy_number']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -18,7 +18,7 @@ class PatientRegistrationForm(forms.ModelForm):
 class MedicalProfessionalRegistrationForm(forms.ModelForm):
     class Meta:
         model = MedicalProfessional
-        fields = ['username', 'password1', 'password2', 'first_name', 'last_name', 'date_of_birth']
+        fields = ['username', 'password', 'password', 'first_name', 'last_name', 'date_of_birth']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
