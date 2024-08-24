@@ -1,9 +1,27 @@
 from django.db import models
-
-# Create your models here.
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    is_patient = models.BooleanField(default=False)
+    is_medical_professional = models.BooleanField(default=False)
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='ehr_user_set',
+        blank=True,
+        help_text=_('The groups this user belongs to. A user will get all permissions granted to each of their groups.'),
+        verbose_name=_('groups'),
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='ehr_user_set',
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        verbose_name=_('user permissions'),
+    )
 
 class Patient(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     first_name = models.CharField(_('first name'), max_length=255)
     last_name = models.CharField(_('last name'), max_length=255)
     date_of_birth = models.DateField(_('date of birth'))
@@ -18,6 +36,7 @@ class Patient(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 class MedicalProfessional(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     first_name = models.CharField(_('first name'), max_length=255)
     last_name = models.CharField(_('last name'), max_length=255)
     specialization = models.CharField(_('specialization'), max_length=255)
