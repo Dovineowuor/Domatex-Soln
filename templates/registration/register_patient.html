@@ -1,0 +1,17 @@
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Patient</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Register Patient</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+        </form>
+    </div>
+</body>
+</html>
